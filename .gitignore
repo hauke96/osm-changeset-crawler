@@ -4,6 +4,7 @@
 *.dll
 *.so
 *.dylib
+osm-changeset-analyser
 
 # Test binary, built with `go test -c`
 *.test
