@@ -14,7 +14,7 @@ import (
 // read the given file and cache "cacheSize" many changesets from that file
 // before handing it over to the "changesetStringChan". The pipeline receives
 // an array of strings, each string is one changeset.
-func read(fileName string, cacheSize int, changesetStringChan chan []string) {
+func read(fileName string, cacheSize int, changesetStringChan chan<- []string) {
 	defer close(changesetStringChan)
 
 	changesetPrefix := "<ch"

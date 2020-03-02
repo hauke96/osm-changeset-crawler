@@ -8,7 +8,7 @@ import (
 	"github.com/hauke96/sigolo"
 )
 
-func parse(cacheSize int, changesetStringChannel chan []string, changesetChannel chan []Changeset) {
+func parse(cacheSize int, changesetStringChannel <-chan []string, changesetChannel chan<- []Changeset) {
 	defer close(changesetChannel)
 
 	// Amount of processed changeset within the current cache. When the cache
