@@ -1,3 +1,5 @@
+// This file contains the reader, reading an OSM-file (usually .osm or .xml
+// files) and send each changeset as one-line string to a given channel.
 package main
 
 import (
@@ -10,9 +12,11 @@ import (
 )
 
 // read the given file and cache "cacheSize" many changesets from that file
-// before handing it over to the "pipeline". The pipeline receives an array of
-// strings, each string is one changeset.
-func read(fileName string, cacheSize int, pipeline chan []string) {
+// before handing it over to the "changesetStringChan". The pipeline receives
+// an array of strings, each string is one changeset.
+func read(fileName string, cacheSize int, changesetStringChan chan []string) {
+	defer close(changesetStringChan)
+
 	changesetPrefix := "<ch"
 	changesetSuffix := "</ch"
 	changesetOneLineSuffix := "/>"
@@ -65,15 +69,16 @@ func read(fileName string, cacheSize int, pipeline chan []string) {
 		if processedChangesets > 0 && processedChangesets%cacheSize == 0 {
 			sigolo.Info("Handled %d changesets", processedChangesets)
 
-			pipeline <- cache
+			changesetStringChan <- cache
 
 			processedChangesets = 0
 			cache = make([]string, cacheSize)
 
-			time.Sleep(1 * time.Second)
+			time.Sleep(100 * time.Millisecond)
 		}
 	}
 
-	pipeline <- cache
-	close(pipeline)
+	sigolo.Info("Reading finished, send remaining strings")
+
+	changesetStringChan <- cache
 }

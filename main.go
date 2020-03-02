@@ -12,29 +12,28 @@ import (
 	"strconv"
 	"strings"
 
-	// "time"
-
 	"github.com/hauke96/sigolo"
 )
 
-
-
 func main() {
-	pipeline := make(chan []string)
+	//sigolo.LogLevel = sigolo.LOG_PLAIN
+	//sigolo.LogLevel = sigolo.LOG_DEBUG
 
-	go read("/home/hauke/Dokumente/OSM/changeset-analysis/test.osm", 5, pipeline)
+	changesetStringChan := make(chan []string)
+	changesetChan := make(chan []Changeset)
 
-	for changesets := range pipeline {
+	go read("/home/hauke/Dokumente/OSM/changeset-analysis/test.osm", 8, changesetStringChan)
+
+	go parse(5, changesetStringChan, changesetChan)
+
+	for changesets := range changesetChan {
 		sigolo.Info("Got %d changesets", len(changesets))
 		for _, c := range changesets {
-			sigolo.Info("    " + c)
+			sigolo.Info("    %d", c.Id)
 		}
 	}
 
 	// All this is old and will be replaces soon:
-
-	//sigolo.LogLevel = sigolo.LOG_PLAIN
-	//sigolo.LogLevel = sigolo.LOG_DEBUG
 
 	// time := "2020-02-28T12:00:00Z" // (time.Now()).Format(time.RFC3339)
 	// bbox := "6,47,15,55"
