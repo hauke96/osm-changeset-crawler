@@ -74,11 +74,11 @@ func read(fileName string, cacheSize int, changesetStringChan chan<- []string) {
 			processedChangesets = 0
 			cache = make([]string, cacheSize)
 
-			time.Sleep(100 * time.Millisecond)
+			time.Sleep(0 * time.Millisecond)
 		}
 	}
 
-	sigolo.Info("Reading finished, send remaining strings")
+	sigolo.Debug("Reading finished, send remaining strings")
 
 	changesetStringChan <- cache
 }

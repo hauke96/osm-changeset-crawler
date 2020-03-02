@@ -23,8 +23,6 @@ func parse(cacheSize int, changesetStringChannel <-chan []string, changesetChann
 				continue
 			}
 
-			sigolo.Info("Parse => %s", changesetString)
-
 			var changeset Changeset
 			xml.Unmarshal([]byte(changesetString), &changeset)
 

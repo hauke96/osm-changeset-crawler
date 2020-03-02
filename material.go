@@ -18,6 +18,8 @@ type Tag struct {
 
 // This defines the known editors later used for analysis of the changsets
 var (
+	editorKey = "created_by" // Key in the tags
+
 	unknownEditor = "_UNKNOWN"
 	noEditor      = "_NO_EDITOR"
 	knownEditors  = []string{
