@@ -5,6 +5,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/hauke96/sigolo"
 )
@@ -12,6 +13,7 @@ import (
 // analyseEditorCount takes bunches of "aggregationSize" many changesets and
 // counts their edits. The result is written to the given file in a CSV format.
 func analyseEditorCount(aggregationSize int, outputPath string, changsetChannel <-chan []Changeset) {
+	clock := time.Now()
 	// columnCount is the amount of column in the CSV file. The value
 	// "len(knownEditors)+1" is the mount of all editors plus column for
 	// changeset count
@@ -44,7 +46,7 @@ func analyseEditorCount(aggregationSize int, outputPath string, changsetChannel 
 	// Go through the changesets and calculate the amount of editor per
 	// "aggregationSize" many changesets
 	for changesets := range changsetChannel {
-		sigolo.Debug("Received %d changesets, count editors", len(changesets))
+		sigolo.Info("Received %d changesets -> count editors", len(changesets))
 		for _, changeset := range changesets {
 			// ID 0 inidcates an empty cache place
 			if changeset.Id == 0 {
@@ -69,6 +71,9 @@ func analyseEditorCount(aggregationSize int, outputPath string, changsetChannel 
 			processedChangesets++
 
 			if processedChangesets == aggregationSize {
+				sigolo.Info("Counted %d editors which took %dms", aggregationSize, time.Since(clock).Milliseconds())
+				clock = time.Now()
+
 				writtenAggregations++
 				processedChangesets = 0
 
@@ -87,7 +92,7 @@ func analyseEditorCount(aggregationSize int, outputPath string, changsetChannel 
 func writeCountToFile(columnCount, processedChangesets int, aggregationMap map[string]int, writer *csv.Writer) {
 	sigolo.Debug("Write %#v", aggregationMap)
 	line := make([]string, columnCount)
-	line[0] = strconv.Itoa(processedChangesets)
+	line[0] = strconv.Itoa(processedChangesets + 1)
 	for i := 1; i < columnCount; i++ {
 		line[i] = strconv.Itoa(aggregationMap[knownEditors[i-1]])
 	}

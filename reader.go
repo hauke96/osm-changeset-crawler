@@ -16,6 +16,7 @@ import (
 // an array of strings, each string is one changeset.
 func read(fileName string, cacheSize int, changesetStringChan chan<- []string) {
 	defer close(changesetStringChan)
+	clock := time.Now()
 
 	changesetPrefix := "<ch"
 	changesetSuffix := "</ch"
@@ -67,14 +68,15 @@ func read(fileName string, cacheSize int, changesetStringChan chan<- []string) {
 		}
 
 		if processedChangesets > 0 && processedChangesets%cacheSize == 0 {
-			sigolo.Info("Handled %d changesets", processedChangesets)
+			sigolo.Info("Read %d changeset strings", processedChangesets)
+			sigolo.Info("Reading took %dms", time.Since(clock).Milliseconds())
 
 			changesetStringChan <- cache
 
 			processedChangesets = 0
 			cache = make([]string, cacheSize)
 
-			time.Sleep(0 * time.Millisecond)
+			clock = time.Now()
 		}
 	}
 

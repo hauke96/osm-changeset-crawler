@@ -4,12 +4,14 @@ package main
 
 import (
 	"encoding/xml"
+	"time"
 
 	"github.com/hauke96/sigolo"
 )
 
 func parse(cacheSize int, changesetStringChannel <-chan []string, changesetChannel chan<- []Changeset) {
 	defer close(changesetChannel)
+	clock := time.Now()
 
 	// Amount of processed changeset within the current cache. When the cache
 	// is sent to the channel, this variable will be reset
@@ -17,6 +19,7 @@ func parse(cacheSize int, changesetStringChannel <-chan []string, changesetChann
 	cache := make([]Changeset, cacheSize)
 
 	for changesets := range changesetStringChannel {
+		sigolo.Info("Received %d changesets -> parsing", len(changesets))
 		for i, changesetString := range changesets {
 			// No data, no action
 			if changesetString == "" {
@@ -34,10 +37,14 @@ func parse(cacheSize int, changesetStringChannel <-chan []string, changesetChann
 			sigolo.Debug("    Cache index   : %d", processedChangesets)
 
 			if processedChangesets%cacheSize == 0 {
-				sigolo.Info("Send parsed changesets")
+				sigolo.Info("Parsed %d changesets", cacheSize)
+				sigolo.Info("  Parsing took %dms", time.Since(clock).Milliseconds())
+
 				changesetChannel <- cache
 				cache = make([]Changeset, cacheSize)
 				processedChangesets = 0
+
+				clock = time.Now()
 			}
 		}
 	}

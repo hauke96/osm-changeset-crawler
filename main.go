@@ -22,22 +22,20 @@ func main() {
 	changesetStringChan := make(chan []string)
 	changesetChan := make(chan []Changeset)
 
-	cacheSize := 10000
+	cacheSize := 1000000
 
-	go read("/home/hauke/Dokumente/OSM/changeset-analysis/test.osm", cacheSize, changesetStringChan)
+	// go read("/home/hauke/Dokumente/OSM/changeset-analysis/test.osm", cacheSize, changesetStringChan)
+	go read("/home/hauke/Dokumente/OSM/changeset-analysis/changesets-200224.osm", cacheSize, changesetStringChan)
 
 	go parse(cacheSize, changesetStringChan, changesetChan)
 
 	analyseEditorCount(cacheSize, "result.csv", changesetChan)
 
-	sigolo.Info("Done")
-
 	// for changesets := range changesetChan {
 	// 	sigolo.Info("Got %d changesets", len(changesets))
-	// 	for _, c := range changesets {
-	// 		sigolo.Info("    %d", c.Id)
-	// 	}
 	// }
+
+	sigolo.Info("Done")
 
 	// All this is old and will be replaces soon:
 
