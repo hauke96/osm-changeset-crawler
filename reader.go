@@ -14,7 +14,7 @@ import (
 // read the given file and cache "cacheSize" many changesets from that file
 // before handing it over to the "changesetStringChan". The pipeline receives
 // an array of strings, each string is one changeset.
-func read(fileName string, cacheSize int, changesetStringChan chan<- []string) {
+func read(fileName string, changesetStringChan chan<- []string) {
 	defer close(changesetStringChan)
 	clock := time.Now()
 
@@ -22,7 +22,11 @@ func read(fileName string, cacheSize int, changesetStringChan chan<- []string) {
 	changesetSuffix := "</ch"
 	changesetOneLineSuffix := "/>"
 
-	cache := make([]string, cacheSize)
+	cache := make([]string, CACHE_SIZE)
+
+	readChangesetSets := 0
+	var line string
+	readChangesetStrings := 0
 
 	// Open file
 	fileHandle, err := os.Open(fileName)
@@ -30,10 +34,9 @@ func read(fileName string, cacheSize int, changesetStringChan chan<- []string) {
 	defer fileHandle.Close()
 	sigolo.Info("Opened file")
 
-	var line string
-	processedChangesets := 0
 	scanner := bufio.NewScanner(fileHandle)
 	sigolo.Info("Created scanner")
+
 	for scanner.Scan() {
 		line = strings.TrimSpace(scanner.Text())
 
@@ -61,20 +64,21 @@ func read(fileName string, cacheSize int, changesetStringChan chan<- []string) {
 			}
 
 			// Done reading the changeset, add it to the cache
-			cache[processedChangesets] = changesetString
-			processedChangesets++
+			cache[readChangesetStrings] = changesetString
+			readChangesetStrings++
 
 			sigolo.Debug("=> %s", changesetString)
 		}
 
-		if processedChangesets > 0 && processedChangesets%cacheSize == 0 {
-			sigolo.Info("Read %d changeset strings", processedChangesets)
+		if readChangesetStrings > 0 && readChangesetStrings%CACHE_SIZE == 0 {
+			sigolo.Info("Read changeset set %d", readChangesetSets)
 			sigolo.Info("Reading took %dms", time.Since(clock).Milliseconds())
+			readChangesetSets++
 
 			changesetStringChan <- cache
 
-			processedChangesets = 0
-			cache = make([]string, cacheSize)
+			readChangesetStrings = 0
+			cache = make([]string, CACHE_SIZE)
 
 			clock = time.Now()
 		}

@@ -15,6 +15,10 @@ import (
 	"github.com/hauke96/sigolo"
 )
 
+var (
+	CACHE_SIZE int
+)
+
 func main() {
 	//sigolo.LogLevel = sigolo.LOG_PLAIN
 	//sigolo.LogLevel = sigolo.LOG_DEBUG
@@ -22,14 +26,14 @@ func main() {
 	changesetStringChan := make(chan []string)
 	changesetChan := make(chan []Changeset)
 
-	cacheSize := 1000000
+	CACHE_SIZE = 1000000
 
 	// go read("/home/hauke/Dokumente/OSM/changeset-analysis/test.osm", cacheSize, changesetStringChan)
-	go read("/home/hauke/Dokumente/OSM/changeset-analysis/changesets-200224.osm", cacheSize, changesetStringChan)
+	go read("/home/hauke/Dokumente/OSM/changeset-analysis/changesets-200224.osm", changesetStringChan)
 
-	go parse(cacheSize, changesetStringChan, changesetChan)
+	go parse(changesetStringChan, changesetChan)
 
-	analyseEditorCount(cacheSize, "result.csv", changesetChan)
+	analyseEditorCount("result.csv", changesetChan)
 
 	// for changesets := range changesetChan {
 	// 	sigolo.Info("Got %d changesets", len(changesets))

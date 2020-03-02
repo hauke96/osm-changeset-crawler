@@ -12,7 +12,7 @@ import (
 
 // analyseEditorCount takes bunches of "aggregationSize" many changesets and
 // counts their edits. The result is written to the given file in a CSV format.
-func analyseEditorCount(aggregationSize int, outputPath string, changsetChannel <-chan []Changeset) {
+func analyseEditorCount(outputPath string, changsetChannel <-chan []Changeset) {
 	clock := time.Now()
 	// columnCount is the amount of column in the CSV file. The value
 	// "len(knownEditors)+1" is the mount of all editors plus column for
@@ -24,6 +24,7 @@ func analyseEditorCount(aggregationSize int, outputPath string, changsetChannel 
 	// to increase the value of the first column showing the amount of
 	// changesets for that row
 	writtenAggregations := 0
+	receivedChangesetSets := 0
 
 	// Open CSV and create writer
 	file, err := os.OpenFile(outputPath, os.O_WRONLY|os.O_CREATE, 0644)
@@ -46,7 +47,9 @@ func analyseEditorCount(aggregationSize int, outputPath string, changsetChannel 
 	// Go through the changesets and calculate the amount of editor per
 	// "aggregationSize" many changesets
 	for changesets := range changsetChannel {
-		sigolo.Info("Received %d changesets -> count editors", len(changesets))
+		sigolo.Info("Received changesets set %d -> count editors", receivedChangesetSets)
+		receivedChangesetSets++
+
 		for _, changeset := range changesets {
 			// ID 0 inidcates an empty cache place
 			if changeset.Id == 0 {
@@ -69,23 +72,21 @@ func analyseEditorCount(aggregationSize int, outputPath string, changsetChannel 
 
 			aggregationMap[editor]++
 			processedChangesets++
-
-			if processedChangesets == aggregationSize {
-				sigolo.Info("Counted %d editors which took %dms", aggregationSize, time.Since(clock).Milliseconds())
-				clock = time.Now()
-
-				writtenAggregations++
-				processedChangesets = 0
-
-				writeCountToFile(columnCount, aggregationSize*writtenAggregations-1, aggregationMap, writer)
-
-				aggregationMap = make(map[string]int)
-			}
 		}
+
+		sigolo.Info("Counted %d editors which took %dms", CACHE_SIZE, time.Since(clock).Milliseconds())
+		clock = time.Now()
+
+		writtenAggregations++
+		processedChangesets = 0
+
+		writeCountToFile(columnCount, CACHE_SIZE*writtenAggregations-1, aggregationMap, writer)
+
+		aggregationMap = make(map[string]int)
 	}
 
 	if processedChangesets != 0 {
-		writeCountToFile(columnCount, aggregationSize*writtenAggregations+processedChangesets, aggregationMap, writer)
+		writeCountToFile(columnCount, CACHE_SIZE*writtenAggregations+processedChangesets, aggregationMap, writer)
 	}
 }
 
