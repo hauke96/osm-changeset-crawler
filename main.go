@@ -52,6 +52,17 @@ var (
 )
 
 func main() {
+	pipeline := make(chan []string)
+
+	go read("/home/hauke/Dokumente/OSM/changeset-analysis/test.osm", 5, pipeline)
+
+	for changesets := range pipeline {
+		sigolo.Info("Got %d changesets", len(changesets))
+		for _, c := range changesets {
+			sigolo.Info("    " + c)
+		}
+	}
+
 	// All this is old and will be replaces soon:
 
 	//sigolo.LogLevel = sigolo.LOG_PLAIN
