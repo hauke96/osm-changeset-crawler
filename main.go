@@ -52,6 +52,8 @@ var (
 )
 
 func main() {
+	// All this is old and will be replaces soon:
+
 	//sigolo.LogLevel = sigolo.LOG_PLAIN
 	//sigolo.LogLevel = sigolo.LOG_DEBUG
 
@@ -62,13 +64,13 @@ func main() {
 
 	//osm := readChangesets("/home/hauke/Dokumente/OSM/changeset-analysis/test.osm", changesetFilter)
 	// osm := readChangesets("/media/hauke/Dokumente/OpenStreetMap/changesets-200224.osm", changesetFilter)
-	osm := readChangesets("/home/hauke/Dokumente/OSM/changeset-analysis/changesets-200224.osm", changesetFilter)
+	// osm := readChangesets("/home/hauke/Dokumente/OSM/changeset-analysis/changesets-200224.osm", changesetFilter)
 
-	sigolo.Info("Got %d changesets", len(osm.Changesets))
+	// sigolo.Info("Got %d changesets", len(osm.Changesets))
 
-	editorMap := sortByEditor(osm.Changesets)
+	// editorMap := sortByEditor(osm.Changesets)
 
-	sigolo.Info("JOSM: %d", len(editorMap["josm"]))
+	// sigolo.Info("JOSM: %d", len(editorMap["josm"]))
 }
 
 func readChangesets(fileName string, filter func(cs *Changeset) bool) *Osm {
