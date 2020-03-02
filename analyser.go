@@ -50,6 +50,8 @@ func analyseEditorCount(outputPath string, changsetChannel <-chan []Changeset) {
 		sigolo.Info("Received changesets set %d -> count editors", receivedChangesetSets)
 		receivedChangesetSets++
 
+		clock = time.Now()
+
 		for _, changeset := range changesets {
 			// ID 0 inidcates an empty cache place
 			if changeset.Id == 0 {
@@ -75,7 +77,6 @@ func analyseEditorCount(outputPath string, changsetChannel <-chan []Changeset) {
 		}
 
 		sigolo.Info("Counted %d editors which took %dms", CACHE_SIZE, time.Since(clock).Milliseconds())
-		clock = time.Now()
 
 		writtenAggregations++
 		processedChangesets = 0

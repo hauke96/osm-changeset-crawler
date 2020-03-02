@@ -28,7 +28,7 @@ func main() {
 
 	CACHE_SIZE = 1000000
 
-	// go read("/home/hauke/Dokumente/OSM/changeset-analysis/test.osm", cacheSize, changesetStringChan)
+	// go read("/home/hauke/Dokumente/OSM/changeset-analysis/test.osm", changesetStringChan)
 	go read("/home/hauke/Dokumente/OSM/changeset-analysis/changesets-200224.osm", changesetStringChan)
 
 	go parse(changesetStringChan, changesetChan)
