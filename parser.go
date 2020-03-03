@@ -113,9 +113,8 @@ func unmarshal(changeset string) Changeset {
 					}
 				}
 			case "tag":
-				c.Tags = make([]Tag, len(root.Attr))
-				for i, a := range root.Attr {
-					t := Tag{}
+				t := Tag{}
+				for _, a := range root.Attr {
 					switch a.Name.Local {
 					case "k":
 						t.K = a.Value
@@ -124,8 +123,8 @@ func unmarshal(changeset string) Changeset {
 						t.V = a.Value
 						break
 					}
-					c.Tags[i] = t
 				}
+				c.Tags = append(c.Tags, t)
 			}
 		}
 	}
