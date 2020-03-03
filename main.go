@@ -23,8 +23,8 @@ func main() {
 	//sigolo.LogLevel = sigolo.LOG_PLAIN
 	//sigolo.LogLevel = sigolo.LOG_DEBUG
 
-	changesetStringChan := make(chan []string)
-	changesetChan := make(chan []Changeset)
+	changesetStringChan := make(chan []string, 5)
+	changesetChan := make(chan []Changeset, 5)
 
 	CACHE_SIZE = 1000000
 
