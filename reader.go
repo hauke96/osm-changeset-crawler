@@ -26,7 +26,6 @@ func read(fileName string, changesetStringChan chan<- []string) {
 
 	readChangesetSets := 0
 	var line string
-	readChangesetStrings := 0
 
 	// Open file
 	fileHandle, err := os.Open(fileName)
@@ -38,50 +37,48 @@ func read(fileName string, changesetStringChan chan<- []string) {
 	sigolo.Info("Created scanner")
 
 	for scanner.Scan() {
-		line = strings.TrimSpace(scanner.Text())
+		clock = time.Now()
 
-		// New changeset starts
-		if strings.HasPrefix(line, changesetPrefix) {
-			sigolo.Debug("Start of changeset")
-			sigolo.Debug("  %s", line)
-			// Read all lines of this changeset
-			changesetString := line
+		for i := 0; i < CACHE_SIZE && scanner.Scan(); i++ {
+			line = strings.TrimSpace(scanner.Text())
 
-			// If the read line is not a one-line-changeset like
-			// "<changeset id=123 open=false ... />"), then read the other lines
-			if !strings.HasSuffix(changesetString, changesetOneLineSuffix) {
-				for scanner.Scan() {
-					line = strings.TrimSpace(scanner.Text())
-					sigolo.Debug("    %s", line)
-					changesetString += line
+			// New changeset starts
+			if strings.HasPrefix(line, changesetPrefix) {
+				sigolo.Debug("Start of changeset")
+				sigolo.Debug("  %s", line)
+				// Read all lines of this changeset
+				changesetString := line
 
-					// Changeset ends
-					if strings.HasPrefix(line, changesetSuffix) {
-						sigolo.Debug("End of changeset")
-						break
+				// If the read line is not a one-line-changeset like
+				// "<changeset id=123 open=false ... />"), then read the other lines
+				if !strings.HasSuffix(changesetString, changesetOneLineSuffix) {
+					for scanner.Scan() {
+						line = strings.TrimSpace(scanner.Text())
+						sigolo.Debug("    %s", line)
+						changesetString += line
+
+						// Changeset ends
+						if strings.HasPrefix(line, changesetSuffix) {
+							sigolo.Debug("End of changeset")
+							break
+						}
 					}
 				}
+
+				// Done reading the changeset, add it to the cache
+				cache[i] = changesetString
+
+				sigolo.Debug("=> %s", changesetString)
 			}
-
-			// Done reading the changeset, add it to the cache
-			cache[readChangesetStrings] = changesetString
-			readChangesetStrings++
-
-			sigolo.Debug("=> %s", changesetString)
 		}
 
-		if readChangesetStrings > 0 && readChangesetStrings%CACHE_SIZE == 0 {
-			sigolo.Info("Read changeset set %d", readChangesetSets)
-			sigolo.Info("Reading took %dms", time.Since(clock).Milliseconds())
-			readChangesetSets++
+		sigolo.Info("Read changeset set %d", readChangesetSets)
+		sigolo.Info("Reading took %dms", time.Since(clock).Milliseconds())
 
-			changesetStringChan <- cache
+		changesetStringChan <- cache
+		cache = make([]string, CACHE_SIZE)
 
-			readChangesetStrings = 0
-			cache = make([]string, CACHE_SIZE)
-
-			clock = time.Now()
-		}
+		sigolo.Info("Total reoundtrip time was %dms", time.Since(clock).Milliseconds())
 	}
 
 	sigolo.Debug("Reading finished, send remaining strings")
