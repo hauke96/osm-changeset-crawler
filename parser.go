@@ -3,11 +3,8 @@
 package main
 
 import (
-	"encoding/xml"
-	"io"
 	"math"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/hauke96/sigolo"
@@ -18,7 +15,7 @@ func parse(changesetStringChannel <-chan []string, changesetChannel chan<- []Cha
 	clock := time.Now()
 
 	// TODO parameter
-	amountOfCunks := int(math.Min(10, float64(CACHE_SIZE)))
+	amountOfCunks := int(math.Min(20, float64(CACHE_SIZE)))
 
 	// Amount of processed changeset within the current cache. When the cache
 	// is sent to the channel, this variable will be reset
@@ -63,7 +60,7 @@ func parse(changesetStringChannel <-chan []string, changesetChannel chan<- []Cha
 }
 
 func parseChangesets(cache *[]Changeset, cacheIndex int, changesets []string, finishChan chan bool) {
-	for i, changesetString := range changesets {
+	for _, changesetString := range changesets {
 		// No data, no action
 		if changesetString == "" {
 			continue
@@ -76,58 +73,92 @@ func parseChangesets(cache *[]Changeset, cacheIndex int, changesets []string, fi
 		(*cache)[cacheIndex] = changeset
 		cacheIndex++
 
-		sigolo.Debug("Parsed and cached changeset with ID %d:", changeset.Id)
-		sigolo.Debug("    Receive index : %d", i)
-		sigolo.Debug("    Cache index   : %d", cacheIndex)
+		// sigolo.Debug("Parsed and cached changeset with ID %d:", changeset.Id)
+		// sigolo.Debug("    Receive index : %d", i)
+		// sigolo.Debug("    Cache index   : %d", cacheIndex)
 	}
 
 	finishChan <- true
 }
 
-func unmarshal(changeset string) Changeset {
-	decoder := xml.NewDecoder(strings.NewReader(changeset))
-
+func unmarshal(data string) Changeset {
 	c := Changeset{}
 
-	for {
-		tok, err := decoder.Token()
-		if err == io.EOF {
-			break
-		}
-		sigolo.FatalCheck(err)
+	i := 11 // skip the beginning of "<changeset "
+	l := len(data)
+	var k, v string
 
-		switch root := tok.(type) {
-		case xml.StartElement:
-			switch root.Name.Local {
-			case "changeset":
-				for _, a := range root.Attr {
-					switch a.Name.Local {
-					case "id":
-						i, err := strconv.Atoi(a.Value)
-						sigolo.FatalCheck(err)
-						c.Id = int64(i)
-						break
-					case editorKey:
-						c.User = a.Value
-						break
-					}
-				}
-			case "tag":
-				t := Tag{}
-				for _, a := range root.Attr {
-					switch a.Name.Local {
-					case "k":
-						t.K = a.Value
-						break
-					case "v":
-						t.V = a.Value
-						break
-					}
-				}
-				c.Tags = append(c.Tags, t)
-			}
+	for i < l {
+		if data[i] == ' ' || data[i] == '/' || data[i] == '<' || data[i] == '>' {
+			i++
+			continue
 		}
+
+		i, k, v = readTag(i, data)
+		// sigolo.Debug("Found k='%s' and v='%s'", k, v)
+
+		switch k {
+		case "k": // <tag k="..." v="..."/>
+			k = v
+
+			i++ // skip space between "k" and "v" XML elements
+			i, _, v = readTag(i, data)
+
+			// sigolo.Debug("Found tag '%s'='%s'", k, v)
+
+			switch k {
+			case "created_by":
+				c.CreatedBy = v
+			}
+		case "id":
+			n, err := strconv.Atoi(v)
+			sigolo.FatalCheck(err)
+			c.Id = int64(n)
+		case "user":
+			c.User = v
+		case "":
+			break
+		default:
+			// sigolo.Debug("Unknown tag: '%s'='%s'", k, v)
+		}
+
+		k = ""
+		v = ""
 	}
 
 	return c
+}
+
+// Parse something like: created_by="JOSM/2019"
+// This will return (i, "created_by", "JOSM/2019")
+func readTag(i int, data string) (int, string, string) {
+	var k, v string
+
+	for data[i] != '=' && data[i] != '>' && data[i] != ' ' {
+		k += string(data[i])
+		i++
+	}
+
+	if data[i] == ' ' { // we read the space after a XML tag beginning
+		// sigolo.Debug("Found beginning of XML tag '%s'", k)
+		i++
+		return i, "", ""
+	}
+
+	if data[i] == '>' { // end of some tag
+		// sigolo.Debug("Found ending of XML tag '%s'", k)
+		i++
+		return i, "", ""
+	}
+
+	i += 2 // skip ="
+
+	for data[i] != '"' {
+		v += string(data[i])
+		i++
+	}
+
+	i++ // skip "
+
+	return i, k, v
 }

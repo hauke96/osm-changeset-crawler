@@ -53,6 +53,8 @@ func analyseEditorCount(outputPath string, changsetChannel <-chan []Changeset) {
 		clock = time.Now()
 
 		for _, changeset := range changesets {
+			sigolo.Debug("Look at changeset %#v", changeset)
+
 			// ID 0 inidcates an empty cache place
 			if changeset.Id == 0 {
 				continue
@@ -60,14 +62,11 @@ func analyseEditorCount(outputPath string, changsetChannel <-chan []Changeset) {
 
 			editor := noEditor
 
-			for _, tag := range changeset.Tags {
-				if tag.K == editorKey {
-					for _, e := range knownEditors {
-						if strings.Contains(strings.ToLower(tag.V), e) {
-							editor = e
-							break
-						}
-					}
+			createdBy := strings.ToLower(changeset.CreatedBy)
+			for _, e := range knownEditors {
+				if strings.Contains(createdBy, e) {
+					sigolo.Debug("Editor found: %s", e)
+					editor = e
 					break
 				}
 			}

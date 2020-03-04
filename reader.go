@@ -18,8 +18,8 @@ func read(fileName string, changesetStringChan chan<- []string) {
 	defer close(changesetStringChan)
 	clock := time.Now()
 
-	changesetPrefix := "<ch"
-	changesetSuffix := "</ch"
+	changesetPrefix := "<changeset "
+	changesetSuffix := "</changeset>"
 	changesetOneLineSuffix := "/>"
 
 	cache := make([]string, CACHE_SIZE)
@@ -33,7 +33,11 @@ func read(fileName string, changesetStringChan chan<- []string) {
 	defer fileHandle.Close()
 	sigolo.Info("Opened file")
 
+	const capacity = 64 * 1024 * 1024
+	buf := make([]byte, capacity)
 	scanner := bufio.NewScanner(fileHandle)
+	scanner.Buffer(buf, capacity)
+
 	sigolo.Info("Created scanner")
 
 	for scanner.Scan() {
@@ -44,8 +48,6 @@ func read(fileName string, changesetStringChan chan<- []string) {
 
 			// New changeset starts
 			if strings.HasPrefix(line, changesetPrefix) {
-				sigolo.Debug("Start of changeset")
-				sigolo.Debug("  %s", line)
 				// Read all lines of this changeset
 				changesetString := line
 
@@ -54,12 +56,10 @@ func read(fileName string, changesetStringChan chan<- []string) {
 				if !strings.HasSuffix(changesetString, changesetOneLineSuffix) {
 					for scanner.Scan() {
 						line = strings.TrimSpace(scanner.Text())
-						sigolo.Debug("    %s", line)
 						changesetString += line
 
 						// Changeset ends
 						if strings.HasPrefix(line, changesetSuffix) {
-							sigolo.Debug("End of changeset")
 							break
 						}
 					}
@@ -67,8 +67,6 @@ func read(fileName string, changesetStringChan chan<- []string) {
 
 				// Done reading the changeset, add it to the cache
 				cache[i] = changesetString
-
-				sigolo.Debug("=> %s", changesetString)
 			}
 		}
 

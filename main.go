@@ -30,6 +30,7 @@ func main() {
 
 	// go read("/home/hauke/Dokumente/OSM/changeset-analysis/test.osm", changesetStringChan)
 	go read("/home/hauke/Dokumente/OSM/changeset-analysis/changesets-200224.osm", changesetStringChan)
+	// go read("test.osm", changesetStringChan)
 
 	go parse(changesetStringChan, changesetChan)
 
@@ -232,22 +233,14 @@ func sortByEditor(changesets []Changeset) map[string][]Changeset {
 	result := make(map[string][]Changeset)
 
 	for _, changeset := range changesets {
-		var createdByTag string
 
 		// Get "created_by" tag from changeset
-		tags := changeset.Tags
-		for _, tag := range tags {
-			sigolo.Debug("Check tag key '%s' with value '%v'", tag.K, tag.V)
-			if tag.K == "created_by" {
-				createdByTag = strings.ToLower(tag.V)
-			}
-		}
-
-		if createdByTag == "" {
+		if changeset.CreatedBy == "" {
 			sigolo.Debug("No editor found for changeset %d", changeset.Id)
-			createdByTag = noEditor
 			continue
 		}
+
+		createdByTag := strings.ToLower(changeset.CreatedBy)
 
 		// Check if the "created_by" value is known. The value can be
 		// complicated like "JOSM/1.5 (15628 en_GB)" so we have to do some minor

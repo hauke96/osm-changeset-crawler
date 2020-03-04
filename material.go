@@ -6,9 +6,9 @@ type Osm struct {
 }
 
 type Changeset struct {
-	Id   int64  `xml:"id,attr"`
-	User string `xml:"user,attr"`
-	Tags []Tag  `xml:"tag"`
+	Id        int64  `xml:"id,attr"`
+	User      string `xml:"user,attr"`
+	CreatedBy string
 }
 
 type Tag struct {
