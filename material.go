@@ -1,13 +1,8 @@
 package main
 
-// This defines the XML structure of an .osm changset file
-type Osm struct {
-	Changesets []Changeset `xml:"changeset"`
-}
-
 type Changeset struct {
-	Id        int64  `xml:"id,attr"`
-	User      string `xml:"user,attr"`
+	Id        int64
+	User      string
 	CreatedBy string
 }
 

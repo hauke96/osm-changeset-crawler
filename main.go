@@ -1,17 +1,6 @@
 package main
 
 import (
-	"bufio"
-	"encoding/csv"
-	"encoding/xml"
-	"errors"
-	"io"
-	"io/ioutil"
-	"net/http"
-	"os"
-	"strconv"
-	"strings"
-
 	"github.com/hauke96/sigolo"
 )
 
