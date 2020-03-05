@@ -11,11 +11,6 @@ type Changeset struct {
 	CreatedBy string
 }
 
-type Tag struct {
-	K string `xml:"k,attr"`
-	V string `xml:"v,attr"`
-}
-
 // This defines the known editors later used for analysis of the changsets
 var (
 	editorKey = "created_by" // Key in the tags
