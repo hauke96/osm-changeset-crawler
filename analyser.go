@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/csv"
+	"fmt"
 	"os"
 	"strconv"
 	"strings"
@@ -18,13 +19,13 @@ func analyseEditorCount(outputPath string, changsetChannel <-chan []Changeset) {
 	// "len(knownEditors)+1" is the mount of all editors plus column for
 	// changeset count
 	columnCount := len(knownEditors) + 1
-	aggregationMap := make(map[string]int)
-	processedChangesets := 0
+	aggregationMap := make(map[string]map[string]int)
 	// writtenAggregations is the number of lines in the CSV file. This is used
 	// to increase the value of the first column showing the amount of
 	// changesets for that row
-	writtenAggregations := 0
 	receivedChangesetSets := 0
+
+	var currentCreatedAt string
 
 	// Open CSV and create writer
 	file, err := os.OpenFile(outputPath, os.O_WRONLY|os.O_CREATE, 0644)
@@ -43,6 +44,7 @@ func analyseEditorCount(outputPath string, changsetChannel <-chan []Changeset) {
 
 	err = writer.Write(headLine)
 	sigolo.FatalCheck(err)
+	writer.Flush()
 
 	// Go through the changesets and calculate the amount of editor per
 	// "aggregationSize" many changesets
@@ -50,56 +52,75 @@ func analyseEditorCount(outputPath string, changsetChannel <-chan []Changeset) {
 		sigolo.Info("Received changesets set %d -> count editors", receivedChangesetSets)
 		receivedChangesetSets++
 
+		clock = time.Now()
+
 		for _, changeset := range changesets {
+			sigolo.Debug("Look at changeset %#v", changeset)
+
 			// ID 0 inidcates an empty cache place
-			if changeset.Id == 0 {
+			if changeset.Id == 0 || changeset.CreatedAt == "" {
 				continue
 			}
 
 			editor := noEditor
+			createdAt := changeset.CreatedAt[0:7] // e.g. "2020-04"
 
-			for _, tag := range changeset.Tags {
-				if tag.K == editorKey {
-					for _, e := range knownEditors {
-						if strings.Contains(strings.ToLower(tag.V), e) {
-							editor = e
-							break
-						}
-					}
+			if _, ok := aggregationMap[createdAt]; !ok {
+				sigolo.Info("Create new map for '%s'", createdAt)
+				aggregationMap[createdAt] = make(map[string]int)
+			}
+
+			createdBy := strings.ToLower(changeset.CreatedBy)
+			for _, e := range knownEditors {
+				if strings.Contains(createdBy, e) {
+					sigolo.Debug("Editor found: %s", e)
+					editor = e
 					break
 				}
 			}
 
-			aggregationMap[editor]++
-			processedChangesets++
+			aggregationMap[createdAt][editor]++
 		}
 
 		sigolo.Info("Counted %d editors which took %dms", CACHE_SIZE, time.Since(clock).Milliseconds())
-		clock = time.Now()
-
-		writtenAggregations++
-		processedChangesets = 0
-
-		writeCountToFile(columnCount, CACHE_SIZE*writtenAggregations-1, aggregationMap, writer)
-
-		aggregationMap = make(map[string]int)
 	}
 
-	if processedChangesets != 0 {
-		writeCountToFile(columnCount, CACHE_SIZE*writtenAggregations+processedChangesets, aggregationMap, writer)
-	}
+	writeCountToFile(columnCount, currentCreatedAt, aggregationMap, writer)
 }
 
-func writeCountToFile(columnCount, processedChangesets int, aggregationMap map[string]int, writer *csv.Writer) {
+func writeCountToFile(columnCount int, keyColumnValue string, aggregationMap map[string]map[string]int, writer *csv.Writer) {
 	sigolo.Debug("Write %#v", aggregationMap)
 	line := make([]string, columnCount)
-	line[0] = strconv.Itoa(processedChangesets + 1)
-	for i := 1; i < columnCount; i++ {
-		line[i] = strconv.Itoa(aggregationMap[knownEditors[i-1]])
+
+	month := 1
+	year := 2000
+	finalDateString := time.Now().Format("2006-01")
+
+	for {
+		dateString := fmt.Sprintf("%d-%02d", year, month)
+
+		editorToCount := aggregationMap[dateString]
+
+		line[0] = dateString
+		i := 1
+		for _, e := range knownEditors {
+			line[i] = strconv.Itoa(editorToCount[e])
+			i++
+		}
+
+		err := writer.Write(line)
+		sigolo.FatalCheck(err)
+
+		month++
+		if month == 13 {
+			month = 1
+			year++
+		}
+
+		if dateString == finalDateString {
+			break
+		}
 	}
 
-	sigolo.Info("Write data for key '%s' to file", line[0])
-
-	err := writer.Write(line)
-	sigolo.FatalCheck(err)
+	writer.Flush()
 }
