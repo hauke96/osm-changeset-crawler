@@ -116,6 +116,8 @@ func unmarshal(data string) Changeset {
 			c.Id = int64(n)
 		case "user":
 			c.User = v
+		case "created_at":
+			c.CreatedAt = v
 		case "":
 			break
 		default:

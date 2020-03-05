@@ -4,6 +4,7 @@ type Changeset struct {
 	Id        int64
 	User      string
 	CreatedBy string
+	CreatedAt string
 }
 
 // This defines the known editors later used for analysis of the changsets
