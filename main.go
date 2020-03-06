@@ -20,7 +20,7 @@ func main() {
 
 	go parse(changesetStringChan, changesetChan)
 
-	analysis.AnalyseEditorCount("result.csv", changesetChan)
+	analysis.Analyse("result.csv", changesetChan)
 
 	sigolo.Info("Done")
 }
