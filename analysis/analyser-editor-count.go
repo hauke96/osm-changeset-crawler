@@ -59,5 +59,5 @@ func AnalyseEditorCount(outputPath string, changsetChannel <-chan []common.Chang
 		sigolo.Info("Counted %d editors which took %dms", common.CACHE_SIZE, time.Since(clock).Milliseconds())
 	}
 
-	writeToFile(columnCount, aggregationMap, writer)
+	writeToFileWithDates(columnCount, aggregationMap, writer)
 }

@@ -11,7 +11,7 @@ import (
 	"github.com/hauke96/sigolo"
 )
 
-func writeToFile(columnCount int, aggregationMap map[string]map[string]int, writer *csv.Writer) {
+func writeToFileWithDates(columnCount int, aggregationMap map[string]map[string]int, writer *csv.Writer) {
 	sigolo.Debug("Write %#v", aggregationMap)
 	line := make([]string, columnCount)
 
