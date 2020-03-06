@@ -14,7 +14,7 @@ import (
 
 // analyseEditorCount takes bunches of "aggregationSize" many changesets and
 // counts their edits. The result is written to the given file in a CSV format.
-func Analyse(outputPath string, changsetChannel <-chan []common.Changeset) {
+func AnalyseEditorCount(outputPath string, changsetChannel <-chan []common.Changeset) {
 	clock := time.Now()
 	// columnCount is the amount of column in the CSV file. The value
 	// "len(knownEditors)+1" is the mount of all editors plus column for
@@ -86,10 +86,10 @@ func Analyse(outputPath string, changsetChannel <-chan []common.Changeset) {
 		sigolo.Info("Counted %d editors which took %dms", common.CACHE_SIZE, time.Since(clock).Milliseconds())
 	}
 
-	writeCountToFile(columnCount, currentCreatedAt, aggregationMap, writer)
+	writeToFile(columnCount, currentCreatedAt, aggregationMap, writer)
 }
 
-func writeCountToFile(columnCount int, keyColumnValue string, aggregationMap map[string]map[string]int, writer *csv.Writer) {
+func writeToFile(columnCount int, keyColumnValue string, aggregationMap map[string]map[string]int, writer *csv.Writer) {
 	sigolo.Debug("Write %#v", aggregationMap)
 	line := make([]string, columnCount)
 

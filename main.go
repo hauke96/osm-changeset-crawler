@@ -24,7 +24,7 @@ func main() {
 
 	go parse(changesetStringChan, changesetChannels)
 
-	analysis.Analyse("result.csv", editorCountChannel)
+	analysis.AnalyseEditorCount("result.csv", editorCountChannel)
 
 	sigolo.Info("Done")
 }
