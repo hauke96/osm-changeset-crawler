@@ -14,3 +14,11 @@ osm-changeset-analyser
 
 # Dependency directories (remove the comment below to include it)
 # vendor/
+
+# Output files
+*.csv
+*.ods
+
+# OpenStreetMap data files
+*.xml
+*.osm
