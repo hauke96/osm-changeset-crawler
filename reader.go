@@ -18,6 +18,8 @@ import (
 // an array of strings, each string is one changeset.
 func read(fileName string, changesetStringChan chan<- []string, finishWaitGroup *sync.WaitGroup) {
 	defer close(changesetStringChan)
+	defer finishWaitGroup.Done()
+
 	clock := time.Now()
 
 	changesetPrefix := "<changeset "
@@ -84,6 +86,4 @@ func read(fileName string, changesetStringChan chan<- []string, finishWaitGroup 
 	sigolo.Debug("Reading finished, send remaining strings")
 
 	changesetStringChan <- cache
-
-	finishWaitGroup.Done()
 }

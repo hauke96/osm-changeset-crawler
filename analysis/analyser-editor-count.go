@@ -14,6 +14,8 @@ import (
 // analyseEditorCount takes bunches of "aggregationSize" many changesets and
 // counts their edits. The result is written to the given file in a CSV format.
 func AnalyseEditorCount(outputPath string, changsetChannel <-chan []common.Changeset, finishWaitGroup *sync.WaitGroup) {
+	defer finishWaitGroup.Done()
+
 	clock := time.Now()
 	// columnCount is the amount of column in the CSV file. The value
 	// "len(knownEditors)+1" is the mount of all editors plus column for
@@ -86,6 +88,4 @@ func AnalyseEditorCount(outputPath string, changsetChannel <-chan []common.Chang
 	}
 
 	writeToFile(columnCount, currentCreatedAt, aggregationMap, writer)
-
-	finishWaitGroup.Done()
 }

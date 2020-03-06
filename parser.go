@@ -18,6 +18,7 @@ func parse(changesetStringChannel <-chan []string, changesetChannel []chan<- []c
 			close(c)
 		}
 	}()
+	defer finishWaitGroup.Done()
 
 	clock := time.Now()
 
@@ -69,8 +70,6 @@ func parse(changesetStringChannel <-chan []string, changesetChannel []chan<- []c
 			c <- cache
 		}
 	}
-
-	finishWaitGroup.Done()
 }
 
 func parseChangesets(cache *[]common.Changeset, cacheIndex int, changesets []string, finishChan chan bool) {
