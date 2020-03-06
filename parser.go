@@ -120,6 +120,10 @@ func unmarshal(data string) common.Changeset {
 			switch k {
 			case "created_by":
 				c.CreatedBy = v
+			case "comment":
+				c.Comment = v
+			case "source":
+				c.Source = v
 			}
 		case "id":
 			n, err := strconv.Atoi(v)
