@@ -5,13 +5,14 @@ package main
 import (
 	"math"
 	"strconv"
+	"sync"
 	"time"
 
 	"github.com/hauke96/osm-changeset-analyser/common"
 	"github.com/hauke96/sigolo"
 )
 
-func parse(changesetStringChannel <-chan []string, changesetChannel []chan<- []common.Changeset) {
+func parse(changesetStringChannel <-chan []string, changesetChannel []chan<- []common.Changeset, finishWaitGroup *sync.WaitGroup) {
 	defer func() {
 		for _, c := range changesetChannel {
 			close(c)
@@ -68,6 +69,8 @@ func parse(changesetStringChannel <-chan []string, changesetChannel []chan<- []c
 			c <- cache
 		}
 	}
+
+	finishWaitGroup.Done()
 }
 
 func parseChangesets(cache *[]common.Changeset, cacheIndex int, changesets []string, finishChan chan bool) {

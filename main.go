@@ -1,6 +1,8 @@
 package main
 
 import (
+	"sync"
+
 	"github.com/hauke96/osm-changeset-analyser/analysis"
 	"github.com/hauke96/osm-changeset-analyser/common"
 
@@ -14,20 +16,25 @@ func main() {
 	changesetStringChan := make(chan []string, 5)
 	changesetChannels := make([]chan<- []common.Changeset, 0)
 
-	// editorCountChannel := make(chan []common.Changeset, 5)
+	editorCountChannel := make(chan []common.Changeset, 5)
 	noCommentCountChannel := make(chan []common.Changeset, 5)
 
-	// changesetChannels = append(changesetChannels, editorCountChannel)
+	changesetChannels = append(changesetChannels, editorCountChannel)
 	changesetChannels = append(changesetChannels, noCommentCountChannel)
 
-	// go read("/home/hauke/Dokumente/OSM/changeset-analysis/test.osm", changesetStringChan)
-	go read("/home/hauke/Dokumente/OSM/changeset-analysis/changesets-200224.osm", changesetStringChan)
-	// go read("test.osm", changesetStringChan)
+	finishWaitGroup := sync.WaitGroup{}
+	finishWaitGroup.Add(4)
 
-	go parse(changesetStringChan, changesetChannels)
+	// go read("/home/hauke/Dokumente/OSM/changeset-analysis/test.osm", changesetStringChan, &finishWaitGroup)
+	go read("/home/hauke/Dokumente/OSM/changeset-analysis/changesets-200224.osm", changesetStringChan, &finishWaitGroup)
+	// go read("test.osm", changesetStringChan, &finishWaitGroup)
 
-	// analysis.AnalyseEditorCount("result_editor-count.csv", editorCountChannel)
-	analysis.AnalyseNoSourceCount("result_no-source-count.csv", noCommentCountChannel)
+	go parse(changesetStringChan, changesetChannels, &finishWaitGroup)
+
+	go analysis.AnalyseEditorCount("result_editor-count.csv", editorCountChannel, &finishWaitGroup)
+	go analysis.AnalyseNoSourceCount("result_no-source-count.csv", noCommentCountChannel, &finishWaitGroup)
+
+	finishWaitGroup.Wait()
 
 	sigolo.Info("Done")
 }

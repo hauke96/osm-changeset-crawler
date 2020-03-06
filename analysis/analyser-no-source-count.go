@@ -4,13 +4,14 @@ import (
 	"encoding/csv"
 	"os"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/hauke96/osm-changeset-analyser/common"
 	"github.com/hauke96/sigolo"
 )
 
-func AnalyseNoSourceCount(outputPath string, changsetChannel <-chan []common.Changeset) {
+func AnalyseNoSourceCount(outputPath string, changsetChannel <-chan []common.Changeset, finishWaitGroup *sync.WaitGroup) {
 	clock := time.Now()
 	// columnCount is the amount of column in the CSV file. The value
 	// "len(knownEditors)+1" is the mount of all editors plus column for
@@ -85,4 +86,6 @@ func AnalyseNoSourceCount(outputPath string, changsetChannel <-chan []common.Cha
 	}
 
 	writeToFile(columnCount, currentCreatedAt, aggregationMap, writer)
+
+	finishWaitGroup.Done()
 }

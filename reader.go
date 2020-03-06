@@ -6,6 +6,7 @@ import (
 	"bufio"
 	"os"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/hauke96/osm-changeset-analyser/common"
@@ -15,7 +16,7 @@ import (
 // read the given file and cache "cacheSize" many changesets from that file
 // before handing it over to the "changesetStringChan". The pipeline receives
 // an array of strings, each string is one changeset.
-func read(fileName string, changesetStringChan chan<- []string) {
+func read(fileName string, changesetStringChan chan<- []string, finishWaitGroup *sync.WaitGroup) {
 	defer close(changesetStringChan)
 	clock := time.Now()
 
@@ -83,4 +84,6 @@ func read(fileName string, changesetStringChan chan<- []string) {
 	sigolo.Debug("Reading finished, send remaining strings")
 
 	changesetStringChan <- cache
+
+	finishWaitGroup.Done()
 }
