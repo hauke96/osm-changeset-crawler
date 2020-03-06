@@ -3,6 +3,7 @@ package analysis
 import (
 	"encoding/csv"
 	"fmt"
+	"os"
 	"strconv"
 	"time"
 
@@ -10,7 +11,7 @@ import (
 	"github.com/hauke96/sigolo"
 )
 
-func writeToFile(columnCount int, keyColumnValue string, aggregationMap map[string]map[string]int, writer *csv.Writer) {
+func writeToFile(columnCount int, aggregationMap map[string]map[string]int, writer *csv.Writer) {
 	sigolo.Debug("Write %#v", aggregationMap)
 	line := make([]string, columnCount)
 
@@ -45,4 +46,38 @@ func writeToFile(columnCount int, keyColumnValue string, aggregationMap map[stri
 	}
 
 	writer.Flush()
+}
+
+func initAnalyser(outputPath string, headLine []string) (time.Time, map[string]map[string]int, *csv.Writer) {
+	clock := time.Now()
+
+	aggregationMap := make(map[string]map[string]int)
+	// writtenAggregations is the number of lines in the CSV file. This is used
+	// to increase the value of the first column showing the amount of
+	// changesets for that row
+
+	// Open CSV and create writer
+	file, err := os.OpenFile(outputPath, os.O_WRONLY|os.O_CREATE, 0644)
+	sigolo.FatalCheck(err)
+	defer file.Close()
+
+	writer := csv.NewWriter(file)
+	defer writer.Flush()
+
+	err = writer.Write(headLine)
+	sigolo.FatalCheck(err)
+	writer.Flush()
+
+	return clock, aggregationMap, writer
+}
+
+func createEditorHeadLine(columnCount int) []string {
+	// Write first head line with the column names
+	headLine := make([]string, columnCount)
+	headLine[0] = "changeset count"
+	for i := 0; i < len(common.KNOWN_EDITORS); i++ {
+		headLine[i+1] = common.KNOWN_EDITORS[i]
+	}
+
+	return headLine
 }
