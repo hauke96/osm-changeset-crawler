@@ -11,8 +11,13 @@ import (
 	"github.com/hauke96/sigolo"
 )
 
-func parse(changesetStringChannel <-chan []string, changesetChannel chan<- []common.Changeset) {
-	defer close(changesetChannel)
+func parse(changesetStringChannel <-chan []string, changesetChannel []chan<- []common.Changeset) {
+	defer func() {
+		for _, c := range changesetChannel {
+			close(c)
+		}
+	}()
+
 	clock := time.Now()
 
 	// TODO parameter
@@ -47,7 +52,10 @@ func parse(changesetStringChannel <-chan []string, changesetChannel chan<- []com
 		sigolo.Info("  Parsing took %dms", time.Since(clock).Milliseconds())
 		clock = time.Now()
 
-		changesetChannel <- cache
+		for _, c := range changesetChannel {
+			c <- cache
+		}
+
 		cache = make([]common.Changeset, common.CACHE_SIZE)
 		cacheIndex = 0
 		sigolo.Info("  Sending parsed data took %dms", time.Since(clock).Milliseconds())
@@ -56,7 +64,9 @@ func parse(changesetStringChannel <-chan []string, changesetChannel chan<- []com
 
 	// When there're actually remaining changesets, send them
 	if cacheIndex != 0 {
-		changesetChannel <- cache
+		for _, c := range changesetChannel {
+			c <- cache
+		}
 	}
 }
 
