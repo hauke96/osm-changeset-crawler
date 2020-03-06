@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/hauke96/osm-changeset-analyser/common"
 	"github.com/hauke96/sigolo"
 )
 
@@ -22,7 +23,7 @@ func read(fileName string, changesetStringChan chan<- []string) {
 	changesetSuffix := "</changeset>"
 	changesetOneLineSuffix := "/>"
 
-	cache := make([]string, CACHE_SIZE)
+	cache := make([]string, common.CACHE_SIZE)
 
 	readChangesetSets := 0
 	var line string
@@ -43,7 +44,7 @@ func read(fileName string, changesetStringChan chan<- []string) {
 	for scanner.Scan() {
 		clock = time.Now()
 
-		for i := 0; i < CACHE_SIZE && scanner.Scan(); i++ {
+		for i := 0; i < common.CACHE_SIZE && scanner.Scan(); i++ {
 			line = strings.TrimSpace(scanner.Text())
 
 			// New changeset starts
@@ -74,7 +75,7 @@ func read(fileName string, changesetStringChan chan<- []string) {
 		sigolo.Info("Reading took %dms", time.Since(clock).Milliseconds())
 
 		changesetStringChan <- cache
-		cache = make([]string, CACHE_SIZE)
+		cache = make([]string, common.CACHE_SIZE)
 
 		sigolo.Info("Total reoundtrip time was %dms", time.Since(clock).Milliseconds())
 	}

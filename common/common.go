@@ -1,4 +1,4 @@
-package main
+package common
 
 type Changeset struct {
 	Id        int64
@@ -9,11 +9,13 @@ type Changeset struct {
 
 // This defines the known editors later used for analysis of the changsets
 var (
-	editorKey = "created_by" // Key in the tags
+	CACHE_SIZE = 1000000
 
-	unknownEditor = "_UNKNOWN"
-	noEditor      = "_NO_EDITOR"
-	knownEditors  = []string{
+	EditorKey = "created_by" // Key in the tags
+
+	UnknownEditor = "_UNKNOWN"
+	NoEditor      = "_NO_EDITOR"
+	KnownEditors  = []string{
 		"josm",
 		"id",
 		"potlatch",
@@ -24,7 +26,7 @@ var (
 		"osmtools",
 		"merkaartor",
 		"osm2go",
-		unknownEditor,
-		noEditor,
+		UnknownEditor,
+		NoEditor,
 	}
 )

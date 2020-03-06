@@ -1,4 +1,4 @@
-package main
+package analysis
 
 import (
 	"encoding/csv"
@@ -8,17 +8,18 @@ import (
 	"strings"
 	"time"
 
+	"github.com/hauke96/osm-changeset-analyser/common"
 	"github.com/hauke96/sigolo"
 )
 
 // analyseEditorCount takes bunches of "aggregationSize" many changesets and
 // counts their edits. The result is written to the given file in a CSV format.
-func analyseEditorCount(outputPath string, changsetChannel <-chan []Changeset) {
+func AnalyseEditorCount(outputPath string, changsetChannel <-chan []common.Changeset) {
 	clock := time.Now()
 	// columnCount is the amount of column in the CSV file. The value
 	// "len(knownEditors)+1" is the mount of all editors plus column for
 	// changeset count
-	columnCount := len(knownEditors) + 1
+	columnCount := len(common.KnownEditors) + 1
 	aggregationMap := make(map[string]map[string]int)
 	// writtenAggregations is the number of lines in the CSV file. This is used
 	// to increase the value of the first column showing the amount of
@@ -38,8 +39,8 @@ func analyseEditorCount(outputPath string, changsetChannel <-chan []Changeset) {
 	// Write first head line with the column names
 	headLine := make([]string, columnCount)
 	headLine[0] = "changeset count"
-	for i := 0; i < len(knownEditors); i++ {
-		headLine[i+1] = knownEditors[i]
+	for i := 0; i < len(common.KnownEditors); i++ {
+		headLine[i+1] = common.KnownEditors[i]
 	}
 
 	err = writer.Write(headLine)
@@ -62,7 +63,7 @@ func analyseEditorCount(outputPath string, changsetChannel <-chan []Changeset) {
 				continue
 			}
 
-			editor := noEditor
+			editor := common.NoEditor
 			createdAt := changeset.CreatedAt[0:7] // e.g. "2020-04"
 
 			if _, ok := aggregationMap[createdAt]; !ok {
@@ -71,7 +72,7 @@ func analyseEditorCount(outputPath string, changsetChannel <-chan []Changeset) {
 			}
 
 			createdBy := strings.ToLower(changeset.CreatedBy)
-			for _, e := range knownEditors {
+			for _, e := range common.KnownEditors {
 				if strings.Contains(createdBy, e) {
 					sigolo.Debug("Editor found: %s", e)
 					editor = e
@@ -82,7 +83,7 @@ func analyseEditorCount(outputPath string, changsetChannel <-chan []Changeset) {
 			aggregationMap[createdAt][editor]++
 		}
 
-		sigolo.Info("Counted %d editors which took %dms", CACHE_SIZE, time.Since(clock).Milliseconds())
+		sigolo.Info("Counted %d editors which took %dms", common.CACHE_SIZE, time.Since(clock).Milliseconds())
 	}
 
 	writeCountToFile(columnCount, currentCreatedAt, aggregationMap, writer)
@@ -103,7 +104,7 @@ func writeCountToFile(columnCount int, keyColumnValue string, aggregationMap map
 
 		line[0] = dateString
 		i := 1
-		for _, e := range knownEditors {
+		for _, e := range common.KnownEditors {
 			line[i] = strconv.Itoa(editorToCount[e])
 			i++
 		}

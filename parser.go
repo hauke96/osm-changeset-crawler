@@ -7,20 +7,21 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/hauke96/osm-changeset-analyser/common"
 	"github.com/hauke96/sigolo"
 )
 
-func parse(changesetStringChannel <-chan []string, changesetChannel chan<- []Changeset) {
+func parse(changesetStringChannel <-chan []string, changesetChannel chan<- []common.Changeset) {
 	defer close(changesetChannel)
 	clock := time.Now()
 
 	// TODO parameter
-	amountOfCunks := int(math.Min(20, float64(CACHE_SIZE)))
+	amountOfCunks := int(math.Min(20, float64(common.CACHE_SIZE)))
 
 	// Amount of processed changeset within the current cache. When the cache
 	// is sent to the channel, this variable will be reset
 	cacheIndex := 0
-	cache := make([]Changeset, CACHE_SIZE)
+	cache := make([]common.Changeset, common.CACHE_SIZE)
 
 	receivedChangesetSets := 0
 
@@ -42,12 +43,12 @@ func parse(changesetStringChannel <-chan []string, changesetChannel chan<- []Cha
 			<-finishChan
 		}
 
-		sigolo.Info("Parsed %d changesets", CACHE_SIZE)
+		sigolo.Info("Parsed %d changesets", common.CACHE_SIZE)
 		sigolo.Info("  Parsing took %dms", time.Since(clock).Milliseconds())
 		clock = time.Now()
 
 		changesetChannel <- cache
-		cache = make([]Changeset, CACHE_SIZE)
+		cache = make([]common.Changeset, common.CACHE_SIZE)
 		cacheIndex = 0
 		sigolo.Info("  Sending parsed data took %dms", time.Since(clock).Milliseconds())
 		clock = time.Now()
@@ -59,7 +60,7 @@ func parse(changesetStringChannel <-chan []string, changesetChannel chan<- []Cha
 	}
 }
 
-func parseChangesets(cache *[]Changeset, cacheIndex int, changesets []string, finishChan chan bool) {
+func parseChangesets(cache *[]common.Changeset, cacheIndex int, changesets []string, finishChan chan bool) {
 	for _, changesetString := range changesets {
 		// No data, no action
 		if changesetString == "" {
@@ -81,8 +82,8 @@ func parseChangesets(cache *[]Changeset, cacheIndex int, changesets []string, fi
 	finishChan <- true
 }
 
-func unmarshal(data string) Changeset {
-	c := Changeset{}
+func unmarshal(data string) common.Changeset {
+	c := common.Changeset{}
 
 	i := 11 // skip the beginning of "<changeset "
 	l := len(data)
