@@ -19,7 +19,7 @@ func AnalyseEditorCount(outputPath string, changsetChannel <-chan []common.Chang
 	// columnCount is the amount of column in the CSV file. The value
 	// "len(knownEditors)+1" is the mount of all editors plus column for
 	// changeset count
-	columnCount := len(common.KnownEditors) + 1
+	columnCount := len(common.KNOWN_EDITORS) + 1
 	aggregationMap := make(map[string]map[string]int)
 	// writtenAggregations is the number of lines in the CSV file. This is used
 	// to increase the value of the first column showing the amount of
@@ -39,8 +39,8 @@ func AnalyseEditorCount(outputPath string, changsetChannel <-chan []common.Chang
 	// Write first head line with the column names
 	headLine := make([]string, columnCount)
 	headLine[0] = "changeset count"
-	for i := 0; i < len(common.KnownEditors); i++ {
-		headLine[i+1] = common.KnownEditors[i]
+	for i := 0; i < len(common.KNOWN_EDITORS); i++ {
+		headLine[i+1] = common.KNOWN_EDITORS[i]
 	}
 
 	err = writer.Write(headLine)
@@ -63,7 +63,7 @@ func AnalyseEditorCount(outputPath string, changsetChannel <-chan []common.Chang
 				continue
 			}
 
-			editor := common.NoEditor
+			editor := common.EDITOR_NOT_SET
 			createdAt := changeset.CreatedAt[0:7] // e.g. "2020-04"
 
 			if _, ok := aggregationMap[createdAt]; !ok {
@@ -72,7 +72,7 @@ func AnalyseEditorCount(outputPath string, changsetChannel <-chan []common.Chang
 			}
 
 			createdBy := strings.ToLower(changeset.CreatedBy)
-			for _, e := range common.KnownEditors {
+			for _, e := range common.KNOWN_EDITORS {
 				if strings.Contains(createdBy, e) {
 					sigolo.Debug("Editor found: %s", e)
 					editor = e
@@ -104,7 +104,7 @@ func writeCountToFile(columnCount int, keyColumnValue string, aggregationMap map
 
 		line[0] = dateString
 		i := 1
-		for _, e := range common.KnownEditors {
+		for _, e := range common.KNOWN_EDITORS {
 			line[i] = strconv.Itoa(editorToCount[e])
 			i++
 		}

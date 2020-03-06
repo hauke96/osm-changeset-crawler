@@ -11,11 +11,7 @@ type Changeset struct {
 var (
 	CACHE_SIZE = 1000000
 
-	EditorKey = "created_by" // Key in the tags
-
-	UnknownEditor = "_UNKNOWN"
-	NoEditor      = "_NO_EDITOR"
-	KnownEditors  = []string{
+	KNOWN_EDITORS = []string{
 		"josm",
 		"id",
 		"potlatch",
@@ -26,7 +22,14 @@ var (
 		"osmtools",
 		"merkaartor",
 		"osm2go",
-		UnknownEditor,
-		NoEditor,
+		EDITOR_UNKNOWN,
+		EDITOR_NOT_SET,
 	}
+)
+
+const (
+	KEY_CREATED_BY = "created_by" // Key in the tags
+
+	EDITOR_UNKNOWN = "_UNKNOWN"
+	EDITOR_NOT_SET = "_NO_EDITOR"
 )
