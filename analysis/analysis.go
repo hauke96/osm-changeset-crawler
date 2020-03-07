@@ -59,15 +59,12 @@ func initAnalyser(outputPath string, headLine []string) (time.Time, map[string]m
 	// Open CSV and create writer
 	file, err := os.OpenFile(outputPath, os.O_WRONLY|os.O_CREATE, 0644)
 	sigolo.FatalCheck(err)
-	defer file.Close()
 
 	writer := csv.NewWriter(file)
-	defer writer.Flush()
-
 	err = writer.Write(headLine)
 	sigolo.FatalCheck(err)
-	writer.Flush()
 
+	writer.Flush()
 	return clock, aggregationMap, writer
 }
 
