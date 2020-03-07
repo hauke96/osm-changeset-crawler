@@ -2,7 +2,7 @@ This is a file with some documentation for developers.
 
 # Pipeline
 
-XML file → Reader → Parser → Analyzers → CSV file
+.xml/.osm file → Reader → Parser → Analysers → CSV files
 
 The **reader** (`reader.go`) reads the file line by line and searches for changesets.
 This is simply done by searching for `<changeset ` and `</changeset>` (ans `/>` for single line changesets).
@@ -10,15 +10,15 @@ After a certain amount of changesets (specified by `CACHE_SIZE` from the `common
 
 The **parser** (`parser.go`) takes `CACHE_SIZE` many changeset strings (including tags and everything) and reads these strings to find the actual metadata.
 To increase performance, the XML parsing is done manually with knowledge about the XML structure (things like: a tag only has `k` followed by `v` as attributes).
-All the collected metadata is send to the analyzers using a list of channels.
-Each analyzer has its own channel for the data.
+All the collected metadata is send to the analysers using a list of channels.
+Each analyser has its own channel for the data.
 
-A **analyzer** is basically a function reading the incoming data and writes some result to a CSV file.
-Currently there is no interface or higher abstraction but some functions shared between several analyzers are used.
+A **analyser** is basically a function reading the incoming data and writes some result to a CSV file.
+Currently there is no interface or higher abstraction but some functions shared between several analysers are used.
 
 
 ```
-read    parse   analyzer
+read    parse   analyser
   |        |        |
  _|_       |        |
 |0  |      |        |

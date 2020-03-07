@@ -100,6 +100,6 @@ Here are some example executions:
 52M result_user-without-source.csv
 ```
 
-# For developer
+# For developers
 There exist multiple goroutines processing the data asynchronously.
 See the [doc](doc/README.md) folder for more information.
