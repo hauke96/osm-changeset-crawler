@@ -108,12 +108,10 @@ func unmarshal(data string) common.Changeset {
 
 		switch k {
 		case "k": // <tag k="..." v="..."/>
-			k = v
+			k = v // because we think of "comment=foo" and "comment" is the value here but we think of it as the actual key of the tag
 
 			i++ // skip space between "k" and "v" XML elements
-			i, _, v = readTag(i, data)
-
-			// sigolo.Debug("Found tag '%s'='%s'", k, v)
+			i, _, v = readTag(i, data) // reads "v=..."
 
 			switch k {
 			case "created_by":
@@ -134,7 +132,6 @@ func unmarshal(data string) common.Changeset {
 		case "":
 			break
 		default:
-			// sigolo.Debug("Unknown tag: '%s'='%s'", k, v)
 		}
 
 		k = ""

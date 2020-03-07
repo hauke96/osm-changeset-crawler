@@ -31,7 +31,7 @@ func AnalyseUserWithoutSource(outputPath string, changsetChannel <-chan []common
 		for _, changeset := range changesets {
 			sigolo.Debug("Look at changeset %#v", changeset)
 
-			// ID 0 inidcates an empty cache place
+			// ID 0 indicates an empty cache place
 			if changeset.Id == 0 || changeset.Source != "" {
 				continue
 			}
