@@ -93,22 +93,22 @@ func ... {
     defer finishWaitGroup.Done()
 
     // important for the csv file writer to know. The +1 is for the "_ALL" column which contains the sum of all values
-	columnCount := len(common.KNOWN_EDITORS) + 1
+    columnCount := len(common.KNOWN_EDITORS) + 1
 
     // The head line of the CSV file
-	headLine := createEditorHeadLine(columnCount)
+    headLine := createEditorHeadLine(columnCount)
 
     // clock: To measure time and performance
     // aggregationMap: A map from user/month/... to a map from editor to number.
     // writer: The CSV file writer
-	clock, aggregationMap, writer := initAnalyser(outputPath, headLine)
+    clock, aggregationMap, writer := initAnalyser(outputPath, headLine)
 
     // ==========
     // Your analysis goes here
     // ==========
 
     // Well, write the result to the file
-	writeToFile(columnCount, aggregationMap, writer)
+    writeToFile(columnCount, aggregationMap, writer)
 }
 ```
 5. Write your analysis. Usually we want to iterate over all changesets, so this example does this as well:
@@ -119,20 +119,20 @@ func ... {
         for _, changeset := range changesets {
             // ID 0 indicates an empty place in the cache, where no changeset is. Happens when the last cache chunk is not completely filled.
             // Do some further filtering here
-			if changeset.Id == 0 {
-				continue
-			}
+            if changeset.Id == 0 {
+                continue
+            }
 
             // Initialize maps for new keys
             if _, ok := aggregationMap[key]; !ok {
-				aggregationMap[key] = make(map[string]int)
-			}
+                aggregationMap[key] = make(map[string]int)
+            }
 
             // Collect your information here, whatever it is
             ...
 
             // The "key" represents a line in the CSV file, where the value of "key" will appear in the first column of each line. The "col" variable is the actual column in each line.
-			aggregationMap[key][col]++
+            aggregationMap[key][col]++
         }
     }
 
