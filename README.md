@@ -2,11 +2,12 @@
 A tool analysing the changesets from [OpenStreetMap (OSM)](https://osm.org).
 
 # Compilation
-This uses the [`sigolo` library](https://github.com/hauke96/sigolo) (logging) as only dependency.
+This uses [`sigolo`](https://github.com/hauke96/sigolo) (logging) and [`kingpin`](https://github.com/hauke96/kingpin) (CLI options) as dependencies.
 Everything can be compiled normally.
 
 ```bash
 go get https://github.com/hauke96/sigolo
+go get https://github.com/hauke96/kingpin
 go run .
 ```
 

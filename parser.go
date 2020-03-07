@@ -3,7 +3,6 @@
 package main
 
 import (
-	"math"
 	"strconv"
 	"sync"
 	"time"
@@ -23,7 +22,7 @@ func parse(changesetStringChannel <-chan []string, changesetChannel []chan<- []c
 	clock := time.Now()
 
 	// TODO parameter
-	amountOfCunks := int(math.Min(20, float64(common.CACHE_SIZE)))
+	// amountOfCunks := int(math.Min(20, float64(common.CACHE_SIZE)))
 
 	// Amount of processed changeset within the current cache. When the cache
 	// is sent to the channel, this variable will be reset
@@ -40,13 +39,13 @@ func parse(changesetStringChannel <-chan []string, changesetChannel []chan<- []c
 
 		// Parallelize parsing
 		finishChan := make(chan bool)
-		chunkSize := len(changesets) / amountOfCunks
+		chunkSize := len(changesets) / common.CACHE_SIZE
 		sigolo.Debug("Chunk size: %d", chunkSize)
-		for chunk := 0; chunk < amountOfCunks; chunk++ {
+		for chunk := 0; chunk < common.CACHE_SIZE; chunk++ {
 			startIndex := chunk * chunkSize
 			go parseChangesets(&cache, startIndex, changesets[startIndex:startIndex+chunkSize], finishChan)
 		}
-		for chunk := 0; chunk < amountOfCunks; chunk++ {
+		for chunk := 0; chunk < common.CACHE_SIZE; chunk++ {
 			<-finishChan
 		}
 
