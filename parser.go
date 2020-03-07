@@ -21,9 +21,6 @@ func parse(changesetStringChannel <-chan []string, changesetChannel []chan<- []c
 
 	clock := time.Now()
 
-	// TODO parameter
-	// amountOfCunks := int(math.Min(20, float64(common.CACHE_SIZE)))
-
 	// Amount of processed changeset within the current cache. When the cache
 	// is sent to the channel, this variable will be reset
 	cacheIndex := 0
