@@ -172,10 +172,14 @@ func readTag(i int, data string) (int, string, string) {
 
 	i += 2 // skip ="
 
+	// We copy here the string to retain encoding of e.g. arabic names
+	from := i
 	for data[i] != '"' {
-		v += string(data[i])
 		i++
 	}
+	v = data[from:i]
+
+	sigolo.Info("%s -> %s", data[i-10:i], v)
 
 	i++ // skip "
 
