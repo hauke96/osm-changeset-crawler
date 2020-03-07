@@ -179,8 +179,6 @@ func readTag(i int, data string) (int, string, string) {
 	}
 	v = data[from:i]
 
-	sigolo.Info("%s -> %s", data[i-10:i], v)
-
 	i++ // skip "
 
 	return i, k, v

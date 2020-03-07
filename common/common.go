@@ -32,6 +32,10 @@ var (
 const (
 	KEY_CREATED_BY = "created_by" // Key in the tags
 
+	ALL = "_ALL"
+
 	EDITOR_UNKNOWN = "_UNKNOWN"
 	EDITOR_NOT_SET = "_NO_EDITOR"
+
+	USER_NOT_SET = "_NO_USER"
 )

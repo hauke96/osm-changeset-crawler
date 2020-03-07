@@ -13,7 +13,6 @@ import (
 
 func writeToFileWithDates(columnCount int, aggregationMap map[string]map[string]int, writer *csv.Writer) {
 	sigolo.Debug("Write %#v", aggregationMap)
-	line := make([]string, columnCount)
 
 	month := 1
 	year := 2000
@@ -21,18 +20,9 @@ func writeToFileWithDates(columnCount int, aggregationMap map[string]map[string]
 
 	for {
 		dateString := fmt.Sprintf("%d-%02d", year, month)
-
 		editorToCount := aggregationMap[dateString]
 
-		line[0] = dateString
-		i := 1
-		for _, e := range common.KNOWN_EDITORS {
-			line[i] = strconv.Itoa(editorToCount[e])
-			i++
-		}
-
-		err := writer.Write(line)
-		sigolo.FatalCheck(err)
+		writeLine(columnCount, dateString, editorToCount, writer)
 
 		month++
 		if month == 13 {
@@ -46,6 +36,34 @@ func writeToFileWithDates(columnCount int, aggregationMap map[string]map[string]
 	}
 
 	writer.Flush()
+}
+
+func writeToFile(columnCount int, aggregationMap map[string]map[string]int, writer *csv.Writer) {
+	sigolo.Debug("Write %#v", aggregationMap)
+
+	for k, v := range aggregationMap {
+		writeLine(columnCount, k, v, writer)
+	}
+
+	writer.Flush()
+}
+
+func writeLine(columnCount int, key string, data map[string]int, writer *csv.Writer) {
+	line := make([]string, columnCount+1) // +1 for the "all" column
+	totalCount := 0
+	line[0] = key
+	i := 1
+
+	for _, e := range common.KNOWN_EDITORS {
+		totalCount += data[e]
+		line[i] = strconv.Itoa(data[e])
+		i++
+	}
+
+	line[i] = strconv.Itoa(totalCount)
+
+	err := writer.Write(line)
+	sigolo.FatalCheck(err)
 }
 
 func initAnalyser(outputPath string, headLine []string) (time.Time, map[string]map[string]int, *csv.Writer) {
