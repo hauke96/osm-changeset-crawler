@@ -13,17 +13,19 @@ type Changeset struct {
 var (
 	CACHE_SIZE = 1000000
 
+	// BEWARE:
+	// The order of this is important as "id" is also contained in "maps.me android" so that MAPS.ME would considered to be iD.
 	KNOWN_EDITORS = []string{
-		"josm",
-		"id",
-		"potlatch",
 		"maps.me",
+		"potlatch",
 		"osmand+",
 		"vespucci",
 		"streetcomplete",
 		"osmtools",
 		"merkaartor",
 		"osm2go",
+		"josm",
+		"id",
 		EDITOR_UNKNOWN,
 		EDITOR_NOT_SET,
 	}
