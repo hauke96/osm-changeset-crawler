@@ -7,7 +7,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/hauke96/osm-changeset-analyser/common"
+	"github.com/hauke96/osm-changeset-crawler/common"
 	"github.com/hauke96/sigolo"
 )
 

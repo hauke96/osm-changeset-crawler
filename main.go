@@ -5,8 +5,8 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/hauke96/osm-changeset-analyser/analysis"
-	"github.com/hauke96/osm-changeset-analyser/common"
+	"github.com/hauke96/osm-changeset-crawler/analysis"
+	"github.com/hauke96/osm-changeset-crawler/common"
 
 	"github.com/hauke96/kingpin"
 	"github.com/hauke96/sigolo"
