@@ -32,13 +32,13 @@ func configureCliArgs() {
 
 * editor-count : Counts the amount of the most common editors for each month.
 	Example output:
-		changeset count,josm,id
+		date,josm,id
 		2020-01,12,30
 		2020-02,15,39
 
 * no-source-count : Counts the amount of monthly changesets without source tag, sorted by editor.
 	Example output:
-		changeset count,josm,id
+		date,josm,id
 		2020-01,0,5
 		2020-02,2,10
 
@@ -47,6 +47,12 @@ func configureCliArgs() {
 		user,josm,id
 		john,55,8
 		anna,18,76
+
+* comment-keywords(foo,bar) : Takes keywords (in this case "foo" and "bar") and counts their occurrence per month.
+	Example output:
+		date,foo,bar
+		2020-01,0,5
+		2020-02,2,10
 `)
 
 }
@@ -93,6 +99,7 @@ func main() {
 			changesetChannels = append(changesetChannels, commentKeywordsChannel)
 			finishWaitGroup.Add(1)
 
+			// TODO handle not existing keywords and other errors
 			keywords := strings.Split(analyserString[17:len(analyserString)-1], " ") // begin after "(" and split by " "
 			for i := 0; i < len(keywords); i++ {
 				keywords[i] = strings.ToLower(strings.TrimSpace(keywords[i]))
