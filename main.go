@@ -48,7 +48,7 @@ func configureCliArgs() {
 		john,55,8
 		anna,18,76
 
-* comment-keywords(foo,bar) : Takes keywords (in this case "foo" and "bar") and counts their occurrence per month.
+* comment-keywords(foo,bar) : Takes keywords (in this case "foo" and "bar") and counts their occurrence per month. Comments and keywords are converted into lower case.
 	Example output:
 		date,foo,bar
 		2020-01,0,5

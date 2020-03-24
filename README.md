@@ -33,6 +33,7 @@ ANALYSERS:
   * editor-count : Counts the amount of the most common editors for each month.
   * no-source-count : Counts the amount of monthly changesets without source tag, sorted by editor.
   * user-without-source : Counts for each user the amount of changesets without source tag for each editor editor.
+  * comment-keywords(foo,bar) : Takes keywords (in this case "foo" and "bar") and counts their occurrence per month. Comments and keywords are converted into lower case.
 ```
 
 So for example this call analyses the `data.osm` using the three analysers for the editor count, the editor without source and the users without source:
