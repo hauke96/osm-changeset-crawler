@@ -72,18 +72,18 @@ func main() {
 	finishWaitGroup.Add(2) // reader and parser
 
 	for _, analyserString := range strings.Split(*appAnalysers, ",") {
-		switch analyserString {
-		case "editor-count":
+		switch {
+		case analyserString == "editor-count":
 			editorCountChannel := make(chan []common.Changeset, 5)
 			changesetChannels = append(changesetChannels, editorCountChannel)
 			go analysis.AnalyseEditorCount("result_editor-count.csv", editorCountChannel, &finishWaitGroup)
 			finishWaitGroup.Add(1)
-		case "no-source-count":
+		case analyserString == "no-source-count":
 			noSourceCountChannel := make(chan []common.Changeset, 5)
 			changesetChannels = append(changesetChannels, noSourceCountChannel)
 			go analysis.AnalyseNoSourceCount("result_no-source-count.csv", noSourceCountChannel, &finishWaitGroup)
 			finishWaitGroup.Add(1)
-		case "user-without-source":
+		case analyserString == "user-without-source":
 			userWithoutSourceChannel := make(chan []common.Changeset, 5)
 			changesetChannels = append(changesetChannels, userWithoutSourceChannel)
 			finishWaitGroup.Add(1)
