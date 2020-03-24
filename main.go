@@ -80,24 +80,16 @@ func main() {
 	for _, analyserString := range strings.Split(*appAnalysers, ",") {
 		switch {
 		case analyserString == "editor-count":
-			editorCountChannel := make(chan []common.Changeset, 5)
-			changesetChannels = append(changesetChannels, editorCountChannel)
+			editorCountChannel := initAnalyserSync(&finishWaitGroup, &changesetChannels)
 			go analysis.AnalyseEditorCount("result_editor-count.csv", editorCountChannel, &finishWaitGroup)
-			finishWaitGroup.Add(1)
 		case analyserString == "no-source-count":
-			noSourceCountChannel := make(chan []common.Changeset, 5)
-			changesetChannels = append(changesetChannels, noSourceCountChannel)
+			noSourceCountChannel := initAnalyserSync(&finishWaitGroup, &changesetChannels)
 			go analysis.AnalyseNoSourceCount("result_no-source-count.csv", noSourceCountChannel, &finishWaitGroup)
-			finishWaitGroup.Add(1)
 		case analyserString == "user-without-source":
-			userWithoutSourceChannel := make(chan []common.Changeset, 5)
-			changesetChannels = append(changesetChannels, userWithoutSourceChannel)
-			finishWaitGroup.Add(1)
+			userWithoutSourceChannel := initAnalyserSync(&finishWaitGroup, &changesetChannels)
 			go analysis.AnalyseUserWithoutSource("result_user-without-source.csv", userWithoutSourceChannel, &finishWaitGroup)
 		case strings.HasPrefix(analyserString, "comment-keyword"): // Example of analyer String: comment-keyword(add,remove, ...)
-			commentKeywordsChannel := make(chan []common.Changeset, 5)
-			changesetChannels = append(changesetChannels, commentKeywordsChannel)
-			finishWaitGroup.Add(1)
+			commentKeywordsChannel := initAnalyserSync(&finishWaitGroup, &changesetChannels)
 
 			// TODO handle not existing keywords and other errors
 			keywords := strings.Split(analyserString[17:len(analyserString)-1], " ") // begin after "(" and split by " "
@@ -109,10 +101,21 @@ func main() {
 		}
 	}
 
+	sigolo.Info("Start reader")
 	go read(*appFile, changesetStringChan, &finishWaitGroup)
+
+	sigolo.Info("Start parser")
 	go parse(changesetStringChan, changesetChannels, &finishWaitGroup)
 
+	sigolo.Info("Wait for finished threads")
 	finishWaitGroup.Wait()
 
 	sigolo.Info("Done")
+}
+
+func initAnalyserSync(finishWaitGroup *sync.WaitGroup, changesetChannels *[]chan<- []common.Changeset) chan []common.Changeset {
+	channel := make(chan []common.Changeset, 5)
+	*changesetChannels = append(*changesetChannels, channel)
+	finishWaitGroup.Add(1)
+	return channel
 }

@@ -110,7 +110,7 @@ func unmarshal(data string) common.Changeset {
 		case "k": // <tag k="..." v="..."/>
 			k = v // because we think of "comment=foo" and "comment" is the value here but we think of it as the actual key of the tag
 
-			i++ // skip space between "k" and "v" XML elements
+			i++                        // skip space between "k" and "v" XML elements
 			i, _, v = readTag(i, data) // reads "v=..."
 
 			switch k {
