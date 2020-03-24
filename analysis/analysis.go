@@ -22,8 +22,9 @@ import (
 func writeToFileWithDates(columnCount int, dataColumnNames []string, addTotalCountColumn bool, aggregationMap map[string]map[string]int, writer *csv.Writer) {
 	sigolo.Debug("Write %#v", aggregationMap)
 
-	month := 1
-	year := 2000
+	// First changeset was 9th April 2005
+	month := 4
+	year := 2005
 	finalDateString := time.Now().Format("2006-01")
 
 	for {
