@@ -126,3 +126,14 @@ func createEditorHeadLine(columnCount int) []string {
 
 	return headLine
 }
+
+func createHeadLine(firstColumn string, dataValues []string) []string {
+	// Write first head line with the column names
+	headLine := make([]string, len(dataValues)+1)
+	headLine[0] = firstColumn
+	for i := 0; i < len(dataValues); i++ {
+		headLine[i+1] = dataValues[i]
+	}
+
+	return headLine
+}

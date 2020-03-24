@@ -88,6 +88,17 @@ func main() {
 			changesetChannels = append(changesetChannels, userWithoutSourceChannel)
 			finishWaitGroup.Add(1)
 			go analysis.AnalyseUserWithoutSource("result_user-without-source.csv", userWithoutSourceChannel, &finishWaitGroup)
+		case strings.HasPrefix(analyserString, "comment-keyword"): // Example of analyer String: comment-keyword(add,remove, ...)
+			commentKeywordsChannel := make(chan []common.Changeset, 5)
+			changesetChannels = append(changesetChannels, commentKeywordsChannel)
+			finishWaitGroup.Add(1)
+
+			keywords := strings.Split(analyserString[17:len(analyserString)-1], " ") // begin after "(" and split by " "
+			for i := 0; i < len(keywords); i++ {
+				keywords[i] = strings.ToLower(strings.TrimSpace(keywords[i]))
+			}
+
+			go analysis.AnalyseCommentKeywordsCount("result_comment-keywords.csv", keywords, commentKeywordsChannel, &finishWaitGroup)
 		}
 	}
 
