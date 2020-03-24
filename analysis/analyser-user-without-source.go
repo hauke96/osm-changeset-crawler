@@ -58,5 +58,5 @@ func AnalyseUserWithoutSource(outputPath string, changsetChannel <-chan []common
 		sigolo.Info("Counted values for %d users, which took %dms", common.CACHE_SIZE, time.Since(clock).Milliseconds())
 	}
 
-	writeToFile(columnCount, common.KNOWN_EDITORS, aggregationMap, writer)
+	writeToFile(columnCount, common.KNOWN_EDITORS, true, aggregationMap, writer)
 }

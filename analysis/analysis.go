@@ -17,7 +17,9 @@ import (
 // The "dataColumnNames" contains the column names for the head line of the data,
 // which is basicall the had line without the first column (which contains the
 // dates in this case).
-func writeToFileWithDates(columnCount int, dataColumnNames []string, aggregationMap map[string]map[string]int, writer *csv.Writer) {
+// You can add an additional column with the sum of each row by setting
+// "addTotalCountColumn" to true.
+func writeToFileWithDates(columnCount int, dataColumnNames []string, addTotalCountColumn bool, aggregationMap map[string]map[string]int, writer *csv.Writer) {
 	sigolo.Debug("Write %#v", aggregationMap)
 
 	month := 1
@@ -28,7 +30,11 @@ func writeToFileWithDates(columnCount int, dataColumnNames []string, aggregation
 		dateString := fmt.Sprintf("%d-%02d", year, month)
 		editorToCount := aggregationMap[dateString]
 
-		writeLine(columnCount, dateString, dataColumnNames, editorToCount, writer)
+		if addTotalCountColumn {
+			writeLineWithTotalCount(columnCount, dateString, dataColumnNames, editorToCount, writer)
+		} else {
+			writeLine(columnCount, dateString, dataColumnNames, editorToCount, writer)
+		}
 
 		month++
 		if month == 13 {
@@ -44,17 +50,35 @@ func writeToFileWithDates(columnCount int, dataColumnNames []string, aggregation
 	writer.Flush()
 }
 
-func writeToFile(columnCount int, dataColumnNames []string, aggregationMap map[string]map[string]int, writer *csv.Writer) {
+func writeToFile(columnCount int, dataColumnNames []string, addTotalCountColumn bool, aggregationMap map[string]map[string]int, writer *csv.Writer) {
 	sigolo.Debug("Write %#v", aggregationMap)
 
-	for k, v := range aggregationMap {
-		writeLine(columnCount, k, dataColumnNames, v, writer)
+	for dateString, editorToCount := range aggregationMap {
+		if addTotalCountColumn {
+			writeLineWithTotalCount(columnCount, dateString, dataColumnNames, editorToCount, writer)
+		} else {
+			writeLine(columnCount, dateString, dataColumnNames, editorToCount, writer)
+		}
 	}
 
 	writer.Flush()
 }
 
 func writeLine(columnCount int, firstColumnName string, dataColumnNames []string, data map[string]int, writer *csv.Writer) {
+	line := make([]string, columnCount)
+	line[0] = firstColumnName
+	i := 1
+
+	for _, e := range dataColumnNames {
+		line[i] = strconv.Itoa(data[e])
+		i++
+	}
+
+	err := writer.Write(line)
+	sigolo.FatalCheck(err)
+}
+
+func writeLineWithTotalCount(columnCount int, firstColumnName string, dataColumnNames []string, data map[string]int, writer *csv.Writer) {
 	line := make([]string, columnCount+1) // +1 for the "all" column
 	totalCount := 0
 	line[0] = firstColumnName
