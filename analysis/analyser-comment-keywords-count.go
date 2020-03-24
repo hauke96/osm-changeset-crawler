@@ -49,7 +49,6 @@ func AnalyseCommentKeywordsCount(outputPath string, keywords []string, changsetC
 			for _, keyword := range keywords {
 				if strings.Contains(comment, keyword) {
 					aggregationMap[createdAt][keyword]++
-					break
 				}
 			}
 		}
