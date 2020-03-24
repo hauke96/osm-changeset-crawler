@@ -11,7 +11,13 @@ import (
 	"github.com/hauke96/sigolo"
 )
 
-func writeToFileWithDates(columnCount int, aggregationMap map[string]map[string]int, writer *csv.Writer) {
+// writeToFileWithDates writes the given data (aggregation map) sorted by month
+// using the writer. The date format is "2006-01" and starts with "2000-01" and
+// goes on until the current month.
+// The "dataColumnNames" contains the column names for the head line of the data,
+// which is basicall the had line without the first column (which contains the
+// dates in this case).
+func writeToFileWithDates(columnCount int, dataColumnNames []string, aggregationMap map[string]map[string]int, writer *csv.Writer) {
 	sigolo.Debug("Write %#v", aggregationMap)
 
 	month := 1
@@ -22,7 +28,7 @@ func writeToFileWithDates(columnCount int, aggregationMap map[string]map[string]
 		dateString := fmt.Sprintf("%d-%02d", year, month)
 		editorToCount := aggregationMap[dateString]
 
-		writeLine(columnCount, dateString, editorToCount, writer)
+		writeLine(columnCount, dateString, dataColumnNames, editorToCount, writer)
 
 		month++
 		if month == 13 {
@@ -38,23 +44,23 @@ func writeToFileWithDates(columnCount int, aggregationMap map[string]map[string]
 	writer.Flush()
 }
 
-func writeToFile(columnCount int, aggregationMap map[string]map[string]int, writer *csv.Writer) {
+func writeToFile(columnCount int, dataColumnNames []string, aggregationMap map[string]map[string]int, writer *csv.Writer) {
 	sigolo.Debug("Write %#v", aggregationMap)
 
 	for k, v := range aggregationMap {
-		writeLine(columnCount, k, v, writer)
+		writeLine(columnCount, k, dataColumnNames, v, writer)
 	}
 
 	writer.Flush()
 }
 
-func writeLine(columnCount int, key string, data map[string]int, writer *csv.Writer) {
+func writeLine(columnCount int, firstColumnName string, dataColumnNames []string, data map[string]int, writer *csv.Writer) {
 	line := make([]string, columnCount+1) // +1 for the "all" column
 	totalCount := 0
-	line[0] = key
+	line[0] = firstColumnName
 	i := 1
 
-	for _, e := range common.KNOWN_EDITORS {
+	for _, e := range dataColumnNames {
 		totalCount += data[e]
 		line[i] = strconv.Itoa(data[e])
 		i++

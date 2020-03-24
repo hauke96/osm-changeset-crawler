@@ -59,5 +59,5 @@ func AnalyseNoSourceCount(outputPath string, changsetChannel <-chan []common.Cha
 		sigolo.Info("Counted %d editors which took %dms", common.CACHE_SIZE, time.Since(clock).Milliseconds())
 	}
 
-	writeToFileWithDates(columnCount, aggregationMap, writer)
+	writeToFileWithDates(columnCount, common.KNOWN_EDITORS, aggregationMap, writer)
 }
